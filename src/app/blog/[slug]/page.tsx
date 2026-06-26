@@ -10,9 +10,7 @@ import { blogPosts } from "@/lib/data";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 
-export function generateStaticParams() {
-  return ["blog1", "blog2", "blog3", "blog4", "blog5", "blog6"].map(slug => ({ slug }));
-}
+// generateStaticParams removed — page uses client-side routing via useParams
 
 const extraPosts = [
   { id: "blog4", title: { en: "Nail Art Trends 2025: What's Hot Right Now", ar: "" }, excerpt: { en: "From chrome nails to 3D art, discover the nail trends taking over Saudi salons.", ar: "" }, image: "https://picsum.photos/seed/blog4/800/500", category: "Nails", date: "2024-12-01", readTime: 4, author: "Nour Al-Rashid" },

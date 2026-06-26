@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Phone, Mail, MapPin, Clock, Instagram, Twitter, ChevronDown, ChevronUp } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, ChevronDown, ChevronUp, Camera, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 
@@ -108,8 +108,8 @@ export default function ContactPage() {
               <p className="text-white/50 text-sm mb-3">Follow Us</p>
               <div className="flex gap-3">
                 {[
-                  { name: "Instagram", icon: <Instagram className="w-5 h-5" />, color: "from-pink-500 to-purple-600" },
-                  { name: "Twitter", icon: <Twitter className="w-5 h-5" />, color: "from-sky-400 to-blue-500" },
+                  { name: "Instagram", icon: <Camera className="w-5 h-5" />, color: "from-pink-500 to-purple-600" },
+                  { name: "Twitter / X", icon: <MessageCircle className="w-5 h-5" />, color: "from-sky-400 to-blue-500" },
                   { name: "Snapchat", icon: <span className="text-sm font-bold">SC</span>, color: "from-yellow-400 to-yellow-500" },
                   { name: "TikTok", icon: <span className="text-sm font-bold">TT</span>, color: "from-black to-glamora-pink" },
                 ].map(s => (

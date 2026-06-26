@@ -10,18 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Rating } from "@/components/ui/Rating";
 
-export function generateStaticParams() {
-  return [
-    { slug: "hair" },
-    { slug: "nails" },
-    { slug: "makeup" },
-    { slug: "skincare" },
-    { slug: "eyebrows" },
-    { slug: "lashes" },
-    { slug: "massage" },
-    { slug: "bridal" },
-  ];
-}
+// generateStaticParams removed — page uses client-side routing
 
 const POPULAR_SERVICES: Record<string, string[]> = {
   hair: ["Balayage", "Keratin Treatment", "Hair Color", "Blowout", "Hair Extensions"],
