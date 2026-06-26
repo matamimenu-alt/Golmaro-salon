@@ -24,6 +24,10 @@ const config: Config = {
           'dark-3': '#3D2A5E',
         }
       },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'serif'],
+      },
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'float-delay': 'float 6s ease-in-out 2s infinite',

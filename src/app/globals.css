@@ -36,3 +36,44 @@ body {
     background: linear-gradient(135deg, #D4A853, #E91E8C);
   }
 }
+
+/* Add after existing content */
+@layer utilities {
+  .glass-effect {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .gradient-text {
+    background: linear-gradient(135deg, #D4A853, #E91E8C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Luxury scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #1A0A2E; }
+::-webkit-scrollbar-thumb { background: #D4A853; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #E91E8C; }
+
+/* Keyframes */
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(212,168,83,0.3); }
+  50% { box-shadow: 0 0 40px rgba(212,168,83,0.6); }
+}
+
+/* Arabic font support */
+[dir="rtl"] { font-family: 'Tajawal', sans-serif; }
+
+/* RTL utilities */
+.rtl-flip { transform: scaleX(-1); }
