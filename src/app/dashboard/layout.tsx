@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           {!collapsed && (
             <div>
-              <p className="text-white font-bold text-sm">Glamora</p>
+              <p className="text-white font-bold text-sm">Beautiva</p>
               <p className="text-white/40 text-xs">Dashboard</p>
             </div>
           )}

@@ -598,7 +598,7 @@ export default function HomePage() {
                 <span className={cn('text-glamora-gold text-sm font-semibold', isAr && 'font-tajawal')}>{isAr ? 'لأصحاب الصالونات' : 'For Salon Owners'}</span>
               </div>
               <h2 className={cn('text-3xl sm:text-4xl font-bold text-white mb-4', isAr && 'font-tajawal')}>
-                {isAr ? 'طوّري صالونك مع غلامورا' : 'Grow Your Salon with Glamora'}
+                {isAr ? 'طوّري صالونك مع بيوتيفا' : 'Grow Your Salon with Beautiva'}
               </h2>
               <p className={cn('text-white/60 text-lg max-w-2xl mx-auto mb-8', isAr && 'font-tajawal')}>
                 {isAr ? 'انضم إلى أكثر من ٥٠٠ صالون وابدأ في استقبال حجوزات جديدة من عملاء مميزين عبر منصتنا' : 'Join 500+ salons and start receiving new bookings from premium customers through our platform'}

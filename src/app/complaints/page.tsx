@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 const MOCK_COMPLAINTS = [
   { id: "CMP-001", type: "Service Quality", salon: "Lumière Beauty Lounge", date: "2024-12-10", status: "resolved", desc: "The balayage didn't match the reference photo I provided." },
   { id: "CMP-002", type: "Staff Behavior", salon: "Crystal Nails Studio", date: "2024-12-15", status: "under review", desc: "Staff were dismissive and did not listen to my preferences." },
-  { id: "CMP-003", type: "Billing Issue", salon: "Radiance Skin Clinic", date: "2024-12-18", status: "pending", desc: "I was charged more than the price shown on Glamora." },
+  { id: "CMP-003", type: "Billing Issue", salon: "Radiance Skin Clinic", date: "2024-12-18", status: "pending", desc: "I was charged more than the price shown on Beautiva." },
 ];
 
 const STEPS = ["Submitted", "Under Review", "Waiting for Response", "Resolved"];

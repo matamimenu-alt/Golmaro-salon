@@ -47,7 +47,7 @@ export const translations = {
     services: { en: 'Services', ar: 'الخدمات' },
     offers:   { en: 'Offers',   ar: 'العروض' },
     blog:     { en: 'Blog',     ar: 'المدونة' },
-    about:    { en: 'About',    ar: 'عن غلامورا' },
+    about:    { en: 'About',    ar: 'عن بيوتيفا' },
     contact:  { en: 'Contact',  ar: 'تواصل معنا' },
     partner:  { en: 'Partner',  ar: 'شراكة' },
     login:    { en: 'Login',    ar: 'تسجيل الدخول' },

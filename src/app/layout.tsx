@@ -9,15 +9,15 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export const metadata: Metadata = {
-  title: "Glamora - Beauty Booking Platform Saudi Arabia | منصة الجمال في السعودية",
+  title: "Beautiva - Beauty Booking Platform Saudi Arabia | منصة بيوتيفا للجمال",
   description: "Book premium beauty services at 500+ luxury salons across Saudi Arabia. Hair, nails, makeup, skincare, bridal and more.",
-  keywords: ["beauty salon Riyadh", "book beauty services Saudi Arabia", "luxury salon booking", "glamora"],
+  keywords: ["beauty salon Riyadh", "book beauty services Saudi Arabia", "luxury salon booking", "beautiva"],
   openGraph: {
-    title: "Glamora - Saudi Arabia's #1 Beauty Marketplace",
+    title: "Beautiva - Saudi Arabia's #1 Beauty Marketplace",
     description: "Book premium beauty services at top salons across Saudi Arabia",
     type: "website",
     locale: "en_US",
-    siteName: "Glamora",
+    siteName: "Beautiva",
   },
 };
 

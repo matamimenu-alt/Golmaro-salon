@@ -127,7 +127,7 @@ export default function AccountPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Sparkles className="w-5 h-5 text-glamora-gold" />
-                  <span className="text-glamora-gold font-bold text-lg">Glamora</span>
+                  <span className="text-glamora-gold font-bold text-lg">Beautiva</span>
                 </div>
                 <p className="text-white/40 text-xs">LOYALTY CARD</p>
               </div>

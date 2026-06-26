@@ -12,17 +12,30 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // Legacy aliases → Beautiva purple (keeps old class names working)
         glamora: {
-          gold: '#D4A853',
-          'gold-light': '#F0C878',
-          'gold-dark': '#B8912A',
-          pink: '#E91E8C',
-          'pink-light': '#FF4DAD',
-          'pink-dark': '#C4166F',
-          dark: '#1A0A2E',
-          'dark-2': '#2D1B4E',
-          'dark-3': '#3D2A5E',
-        }
+          gold: '#9333EA',
+          'gold-light': '#A855F7',
+          'gold-dark': '#7C3AED',
+          pink: '#D946EF',
+          'pink-light': '#E879F9',
+          'pink-dark': '#C026D3',
+          dark: '#0D0520',
+          'dark-2': '#160A30',
+          'dark-3': '#1E1040',
+        },
+        // Beautiva brand palette
+        bv: {
+          purple: '#7C3AED',
+          'purple-light': '#A855F7',
+          'purple-pale': '#C084FC',
+          lilac: '#E9D5FF',
+          fuchsia: '#D946EF',
+          dark: '#0D0520',
+          'dark-2': '#160A30',
+          'dark-3': '#1E1040',
+          'dark-4': '#2A1650',
+        },
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],

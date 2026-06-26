@@ -16,16 +16,16 @@ const BENEFITS = [
 ];
 
 const PLANS = [
-  { name: "Starter", price: "Free", period: "", features: ["5 services listed", "Basic booking calendar", "Email notifications", "Customer reviews", "Glamora directory listing"], cta: "Get Started", highlight: false },
+  { name: "Starter", price: "Free", period: "", features: ["5 services listed", "Basic booking calendar", "Email notifications", "Customer reviews", "Beautiva directory listing"], cta: "Get Started", highlight: false },
   { name: "Professional", price: "SAR 199", period: "/mo", features: ["Unlimited services", "Advanced booking calendar", "SMS + Email notifications", "Offer & promotions tool", "Analytics dashboard", "Priority listing"], cta: "Start Free Trial", highlight: true },
   { name: "Premium", price: "SAR 399", period: "/mo", features: ["Everything in Professional", "Loyalty program tools", "Home service management", "Staff management", "Custom branding", "Dedicated account manager"], cta: "Start Free Trial", highlight: false },
   { name: "Enterprise", price: "Custom", period: "", features: ["Everything in Premium", "Multi-branch management", "API access", "White-label option", "Custom integrations", "SLA guarantee"], cta: "Contact Sales", highlight: false },
 ];
 
 const TESTIMONIALS = [
-  { name: "Amal Al-Ghamdi", salon: "Lumière Beauty Lounge", quote: "Glamora increased our bookings by 300% in the first 3 months. It's been a game-changer for our business.", avatar: "partner1" },
+  { name: "Amal Al-Ghamdi", salon: "Lumière Beauty Lounge", quote: "Beautiva increased our bookings by 300% in the first 3 months. It's been a game-changer for our business.", avatar: "partner1" },
   { name: "Fatima Al-Rashid", salon: "Crystal Nails Studio", quote: "The analytics dashboard helped us understand peak hours and optimize our staff schedule. Revenue is up 45%.", avatar: "partner2" },
-  { name: "Noura Al-Zahrani", salon: "Velvet Touch Beauty", quote: "Our clients love the online booking experience. We've seen a huge reduction in no-shows since joining Glamora.", avatar: "partner3" },
+  { name: "Noura Al-Zahrani", salon: "Velvet Touch Beauty", quote: "Our clients love the online booking experience. We've seen a huge reduction in no-shows since joining Beautiva.", avatar: "partner3" },
 ];
 
 const PARTNER_FAQS = [
@@ -33,7 +33,7 @@ const PARTNER_FAQS = [
   { q: "Is there a contract commitment?", a: "No long-term contracts! All paid plans are month-to-month with the option to cancel anytime." },
   { q: "How do I receive payments?", a: "Payments are deposited directly to your bank account within 2 business days after each completed booking." },
   { q: "Can I manage multiple branches?", a: "Yes! Our Enterprise plan supports unlimited branches with centralized management." },
-  { q: "What commission does Glamora take?", a: "Glamora charges a flat platform fee (your monthly subscription) with no per-booking commission on paid plans." },
+  { q: "What commission does Beautiva take?", a: "Beautiva charges a flat platform fee (your monthly subscription) with no per-booking commission on paid plans." },
 ];
 
 export default function PartnerPage() {
@@ -51,7 +51,7 @@ export default function PartnerPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Badge variant="gold" className="mb-6">For Salon Owners</Badge>
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Grow Your Salon with <span className="text-gold-gradient">Glamora</span>
+              Grow Your Salon with <span className="text-gold-gradient">Beautiva</span>
             </h1>
             <p className="text-white/70 text-xl mb-8 max-w-2xl mx-auto">
               Join 500+ successful salons already growing their business on Saudi Arabia&apos;s #1 beauty platform.

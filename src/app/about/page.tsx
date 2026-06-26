@@ -24,7 +24,7 @@ const TEAM = [
 ];
 
 const TIMELINE = [
-  { year: "2020", title: "Glamora Founded", desc: "Launched in Riyadh with a vision to revolutionize beauty booking in Saudi Arabia." },
+  { year: "2020", title: "Beautiva Founded", desc: "Launched in Riyadh with a vision to revolutionize beauty booking in Saudi Arabia." },
   { year: "2021", title: "First 100 Salons", desc: "Reached our milestone of 100 partner salons across Riyadh and Al Khobar." },
   { year: "2022", title: "App Launch", desc: "Launched our iOS and Android app, bringing beauty booking to your fingertips." },
   { year: "2023", title: "Jeddah Expansion", desc: "Expanded to Jeddah and Makkah, connecting thousands of new customers with top salons." },
@@ -48,7 +48,7 @@ export default function AboutPage() {
               Redefining <span className="text-gold-gradient">Beauty</span> in Saudi Arabia
             </h1>
             <p className="text-white/70 text-xl max-w-2xl mx-auto">
-              Glamora was built on a simple belief: every woman deserves access to world-class beauty services, effortlessly booked from anywhere.
+              Beautiva was built on a simple belief: every woman deserves access to world-class beauty services, effortlessly booked from anywhere.
             </p>
           </motion.div>
         </div>
@@ -85,7 +85,7 @@ export default function AboutPage() {
         {/* Team */}
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-white text-center mb-3">Meet the Team</h2>
-          <p className="text-white/50 text-center mb-10">The passionate people behind Glamora</p>
+          <p className="text-white/50 text-center mb-10">The passionate people behind Beautiva</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5">
             {TEAM.map((member, i) => (
               <motion.div key={member.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.07 }}
@@ -136,7 +136,7 @@ export default function AboutPage() {
         {/* Join Us CTA */}
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="text-center backdrop-blur-md bg-glamora-gold/10 border border-glamora-gold/30 rounded-3xl p-12">
-          <h2 className="text-4xl font-bold text-white mb-4">Join the Glamora Family</h2>
+          <h2 className="text-4xl font-bold text-white mb-4">Join the Beautiva Family</h2>
           <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">Whether you&apos;re a beauty lover or a salon owner, there&apos;s a place for you in our community.</p>
           <div className="flex gap-4 justify-center flex-wrap">
             <Link href="/salons"><Button size="lg">Explore Salons <ArrowRight className="w-5 h-5" /></Button></Link>

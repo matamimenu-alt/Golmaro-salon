@@ -15,7 +15,7 @@ const TIERS = [
 ];
 
 const STEPS = [
-  { num: "1", title: "Sign Up", desc: "Create your free Glamora account and automatically join the rewards program." },
+  { num: "1", title: "Sign Up", desc: "Create your free Beautiva account and automatically join the rewards program." },
   { num: "2", title: "Book Services", desc: "Book any beauty service at participating salons across Saudi Arabia." },
   { num: "3", title: "Earn Points", desc: "Earn 1 point for every SAR 1 spent. Bonus points on special occasions." },
   { num: "4", title: "Redeem Rewards", desc: "Redeem your points for discounts, free services, and exclusive experiences." },
@@ -44,7 +44,7 @@ export default function LoyaltyPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Badge variant="gold" className="mb-6">Rewards Program</Badge>
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              <span className="text-gold-gradient">Glamora</span> Rewards
+              <span className="text-gold-gradient">Beautiva</span> Rewards
             </h1>
             <p className="text-white/70 text-xl mb-10 max-w-2xl mx-auto">Earn points on every booking and unlock exclusive beauty rewards.</p>
 

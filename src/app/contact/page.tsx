@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/Badge";
 const FAQS = [
   { q: "How do I book an appointment?", a: "Simply browse our salons, select your preferred service and time slot, and confirm your booking. You'll receive a confirmation via SMS and email." },
   { q: "Can I cancel or reschedule my booking?", a: "Yes! You can cancel or reschedule up to 2 hours before your appointment through the app or website at no charge." },
-  { q: "Are prices listed inclusive of VAT?", a: "All prices shown on Glamora include 15% VAT as per Saudi regulations." },
+  { q: "Are prices listed inclusive of VAT?", a: "All prices shown on Beautiva include 15% VAT as per Saudi regulations." },
   { q: "What if I'm not satisfied with the service?", a: "Your satisfaction is our priority. Contact us within 24 hours of your appointment and we'll work with the salon to find a solution." },
   { q: "How do I become a partner salon?", a: "Visit our Partner page and fill out the registration form. Our team will reach out within 2 business days." },
 ];
