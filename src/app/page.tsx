@@ -1,391 +1,522 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+'use client'
+import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 import {
   Scissors, Sparkles, Heart, Eye, Star, Zap, Crown,
-  MapPin, ChevronRight, ArrowRight, Clock,
-  Building2, Percent, Search, Calendar,
-  CheckCircle, Download
-} from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { Rating } from "@/components/ui/Rating";
-import { Avatar } from "@/components/ui/Avatar";
-import { salons, categories, offers, reviews, packages, blogPosts, getFeaturedSalons } from "@/lib/data";
-import { cn } from "@/lib/utils";
+  MapPin, ArrowRight, Clock, Search, Calendar,
+  CheckCircle, ChevronLeft, ChevronRight, Play, Shield, Award
+} from 'lucide-react'
+import { Rating } from '@/components/ui/Rating'
+import { salons, categories, offers, reviews, packages, blogPosts, getFeaturedSalons } from '@/lib/data'
+import { cn } from '@/lib/utils'
+import { useLang, translations } from '@/lib/i18n'
 
+// ─── Hero Slides ─────────────────────────────────────────────────────────────
+const heroSlides = [
+  {
+    id: 1,
+    image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=1920&q=80',
+    fallback: 'https://picsum.photos/seed/beauty-salon-luxury/1920/1080',
+    badge:    { en: '✨ Premium Beauty Experience',       ar: '✨ تجربة تجميل فاخرة' },
+    title:    { en: "Saudi Arabia's Most Luxurious",      ar: 'اكتشفي أفخم صالونات' },
+    accent:   { en: 'Beauty Marketplace',                 ar: 'التجميل في المملكة' },
+    subtitle: { en: 'Book premium beauty services at 500+ verified luxury salons across Riyadh, Jeddah and the GCC.', ar: 'احجزي خدمات التجميل الفاخرة في أكثر من ٥٠٠ صالون معتمد في الرياض وجدة وعبر دول الخليج.' },
+    cta1:     { en: 'Book Now',       ar: 'احجزي الآن' },
+    cta2:     { en: 'Explore Salons', ar: 'استكشفي الصالونات' },
+    accent1Color: 'from-glamora-gold to-amber-300',
+  },
+  {
+    id: 2,
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1920&q=80',
+    fallback: 'https://picsum.photos/seed/hair-salon-riyadh/1920/1080',
+    badge:    { en: '💅 Exclusive Deals Updated Daily',   ar: '💅 عروض حصرية تتجدد يومياً' },
+    title:    { en: 'Unbeatable Beauty Deals',            ar: 'عروض تجميل لا تُقاوم' },
+    accent:   { en: 'Up to 60% Off',                     ar: 'خصم يصل إلى ٦٠٪' },
+    subtitle: { en: 'Flash deals, seasonal packages, and limited-time offers from top-rated salons. New deals every morning.', ar: 'صفقات سريعة وباقات موسمية وعروض محدودة من أعلى الصالونات تقييماً. عروض جديدة كل صباح.' },
+    cta1:     { en: 'View Offers',  ar: 'عرض العروض' },
+    cta2:     { en: 'Flash Deals',  ar: 'صفقات سريعة' },
+    accent1Color: 'from-glamora-pink to-rose-400',
+  },
+  {
+    id: 3,
+    image: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1920&q=80',
+    fallback: 'https://picsum.photos/seed/bridal-beauty/1920/1080',
+    badge:    { en: '👑 Join 50,000+ Happy Members',      ar: '👑 انضمي لأكثر من ٥٠٠٠٠ عضوة سعيدة' },
+    title:    { en: 'Your Dream Wedding,',                ar: 'حفل زفافك المثالي' },
+    accent:   { en: 'Perfectly Styled',                  ar: 'بتنسيق احترافي لا يُنسى' },
+    subtitle: { en: 'Complete bridal packages from Riyadh\'s finest makeup artists, hair stylists, and nail technicians.', ar: 'باقات عروس كاملة من أفضل فناني المكياج والمصففين وخبراء الأظافر في الرياض.' },
+    cta1:     { en: 'Bridal Packages', ar: 'باقات العروس' },
+    cta2:     { en: 'View Salons',     ar: 'عرض الصالونات' },
+    accent1Color: 'from-purple-400 to-glamora-pink',
+  },
+]
+
+// ─── Animated Counter ──────────────────────────────────────────────────────
+function AnimatedCounter({ target, suffix = '', duration = 2000 }: { target: number; suffix?: string; duration?: number }) {
+  const [count, setCount] = useState(0)
+  const ref = useRef<HTMLSpanElement>(null)
+  const inView = useInView(ref, { once: true })
+  useEffect(() => {
+    if (!inView) return
+    const start = Date.now()
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - start
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setCount(Math.floor(eased * target))
+      if (progress >= 1) clearInterval(timer)
+    }, 16)
+    return () => clearInterval(timer)
+  }, [inView, target, duration])
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>
+}
+
+// ─── Countdown Timer ───────────────────────────────────────────────────────
 function CountdownTimer({ expiresAt }: { expiresAt: string }) {
-  const [time, setTime] = useState({ h: 0, m: 0, s: 0 });
-
+  const [time, setTime] = useState({ h: 0, m: 0, s: 0 })
   useEffect(() => {
     const update = () => {
-      const diff = new Date(expiresAt).getTime() - Date.now();
-      if (diff <= 0) { setTime({ h: 0, m: 0, s: 0 }); return; }
-      setTime({
-        h: Math.floor(diff / 3600000),
-        m: Math.floor((diff % 3600000) / 60000),
-        s: Math.floor((diff % 60000) / 1000),
-      });
-    };
-    update();
-    const interval = setInterval(update, 1000);
-    return () => clearInterval(interval);
-  }, [expiresAt]);
-
+      const diff = new Date(expiresAt).getTime() - Date.now()
+      if (diff <= 0) return
+      setTime({ h: Math.floor(diff / 3600000), m: Math.floor((diff % 3600000) / 60000), s: Math.floor((diff % 60000) / 1000) })
+    }
+    update()
+    const i = setInterval(update, 1000)
+    return () => clearInterval(i)
+  }, [expiresAt])
   return (
-    <div className="flex items-center gap-1.5">
-      {[
-        { val: time.h, label: "h" },
-        { val: time.m, label: "m" },
-        { val: time.s, label: "s" },
-      ].map(({ val, label }) => (
-        <div key={label} className="flex items-center gap-1">
-          <span className="bg-glamora-dark rounded px-1.5 py-0.5 text-glamora-gold font-mono font-bold text-sm min-w-[28px] text-center">
-            {String(val).padStart(2, "0")}
+    <div className="flex items-center gap-1">
+      {[time.h, time.m, time.s].map((v, i) => (
+        <div key={i} className="flex items-center gap-0.5">
+          <span className="bg-black/40 backdrop-blur-sm rounded-md px-1.5 py-1 text-glamora-gold font-mono font-bold text-xs min-w-[26px] text-center">
+            {String(v).padStart(2, '0')}
           </span>
-          <span className="text-white/40 text-xs">{label}</span>
+          {i < 2 && <span className="text-white/50 text-xs">:</span>}
         </div>
       ))}
     </div>
-  );
+  )
 }
 
-function AnimatedCounter({ target, suffix = "", duration = 2000 }: { target: number; suffix?: string; duration?: number }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!inView) return;
-    const start = Date.now();
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      setCount(Math.floor(progress * target));
-      if (progress >= 1) clearInterval(timer);
-    }, 16);
-    return () => clearInterval(timer);
-  }, [inView, target, duration]);
-
-  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
-}
-
-type SalonType = ReturnType<typeof getFeaturedSalons>[0];
-
-function SalonCard({ salon, index }: { salon: SalonType; index: number }) {
-  const [wishlisted, setWishlisted] = useState(false);
-
+// ─── Salon Card ────────────────────────────────────────────────────────────
+function SalonCard({ salon, index }: { salon: ReturnType<typeof getFeaturedSalons>[0]; index: number }) {
+  const { isAr, t } = useLang()
+  const [wishlisted, setWishlisted] = useState(false)
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      viewport={{ once: true }}
-      className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:border-glamora-gold/30 transition-all duration-300"
+      initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.08, duration: 0.5 }} viewport={{ once: true }}
+      className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:border-glamora-gold/30 hover:-translate-y-1 hover:shadow-xl hover:shadow-glamora-gold/10 transition-all duration-300"
     >
       <div className="relative h-48 overflow-hidden">
-        <Image
-          src={salon.cover}
-          alt={salon.name.en}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-glamora-dark/80 to-transparent" />
-        <button
-          onClick={() => setWishlisted(!wishlisted)}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center"
-        >
-          <Heart className={cn("w-4 h-4 transition-colors", wishlisted ? "fill-glamora-pink text-glamora-pink" : "text-white")} />
+        <Image src={salon.cover} alt={salon.name.en} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 33vw" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <button onClick={() => setWishlisted(!wishlisted)}
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform">
+          <Heart className={cn('w-4 h-4 transition-all', wishlisted ? 'fill-glamora-pink text-glamora-pink' : 'text-white')} />
         </button>
-        <div className="absolute top-3 left-3 flex gap-1.5">
-          {salon.isLuxury && <Badge variant="gold">✨ Luxury</Badge>}
-          {salon.hasHomeService && <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🏠 Home</Badge>}
-        </div>
-        <div className="absolute bottom-3 left-3">
-          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-glamora-gold/50">
-            <Image src={salon.logo} alt={salon.name.en} width={40} height={40} className="object-cover" />
+        {salon.isLuxury && (
+          <div className="absolute top-3 left-3 flex items-center gap-1 bg-glamora-gold/20 backdrop-blur-sm border border-glamora-gold/40 rounded-full px-2.5 py-1">
+            <Crown className="w-3 h-3 text-glamora-gold" />
+            <span className="text-glamora-gold text-xs font-semibold">Luxury</span>
+          </div>
+        )}
+        <div className="absolute bottom-3 left-3 flex items-center gap-2">
+          <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-glamora-gold/60 shadow-lg">
+            <Image src={salon.logo} alt={salon.name.en} width={36} height={36} className="object-cover" />
+          </div>
+          <div>
+            <div className="text-white font-semibold text-sm leading-tight" dir={isAr ? 'rtl' : 'ltr'}>{isAr ? salon.name.ar : salon.name.en}</div>
           </div>
         </div>
       </div>
       <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="font-semibold text-white text-sm">{salon.name.en}</h3>
-            <p className="text-white/50 text-xs" dir="rtl">{salon.name.ar}</p>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <Rating value={salon.rating} size="sm" />
+            <span className="text-glamora-gold text-xs font-bold">{salon.rating}</span>
+            <span className="text-white/30 text-xs">({salon.reviewsCount})</span>
           </div>
           <span className="text-white/40 text-xs font-mono">{salon.priceRange}</span>
         </div>
-        <div className="flex items-center gap-3 mb-3">
-          <Rating value={salon.rating} size="sm" />
-          <span className="text-glamora-gold text-xs font-semibold">{salon.rating}</span>
-          <span className="text-white/40 text-xs">({salon.reviewsCount})</span>
+        <div className="flex items-center gap-1 text-white/50 text-xs mb-3">
+          <MapPin className="w-3 h-3 text-glamora-gold/60 shrink-0" />
+          <span>{isAr ? salon.location.ar : salon.location.en}</span>
         </div>
-        <div className="flex items-center gap-1 text-white/50 text-xs mb-4">
-          <MapPin className="w-3 h-3" />
-          <span>{salon.location.en}</span>
-        </div>
-        <Link href={`/salons/${salon.id}`}>
-          <Button size="sm" className="w-full">Book Now</Button>
+        <Link href={`/salons/${salon.id}`}
+          className={cn('block w-full text-center py-2 bg-gradient-to-r from-glamora-gold to-glamora-pink text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-md shadow-glamora-gold/20', isAr && 'font-tajawal')}>
+          {t('Book Now', 'احجزي الآن')}
         </Link>
       </div>
     </motion.div>
-  );
+  )
 }
 
-const heroSlides = [
-  {
-    id: 1,
-    title: "Your Beauty,",
-    titleAccent: "Your Way",
-    subtitle: "Book premium beauty services at 500+ luxury salons across Saudi Arabia",
-    subtitleAr: "احجزي خدمات تجميل فاخرة في أكثر من ٥٠٠ صالون في المملكة العربية السعودية",
-    image: "https://picsum.photos/seed/hero1/1920/1080",
-    cta: "Book Now",
-    ctaSecondary: "Explore Salons",
-  },
-  {
-    id: 2,
-    title: "Luxury Beauty",
-    titleAccent: "Experience",
-    subtitle: "Discover Riyadh's finest salons with exclusive deals and VIP treatment",
-    subtitleAr: "اكتشفي أفضل صالونات الرياض مع عروض حصرية ومعاملة VIP",
-    image: "https://picsum.photos/seed/hero2/1920/1080",
-    cta: "View Offers",
-    ctaSecondary: "Learn More",
-  },
-  {
-    id: 3,
-    title: "Bridal Dreams",
-    titleAccent: "Come True",
-    subtitle: "Complete bridal packages from Riyadh's top makeup artists and stylists",
-    subtitleAr: "باقات عرائس كاملة من أفضل فناني المكياج والمصففين في الرياض",
-    image: "https://picsum.photos/seed/hero3/1920/1080",
-    cta: "Bridal Packages",
-    ctaSecondary: "View Salons",
-  },
-];
+const catIcons: Record<string, React.ElementType> = {
+  hair: Scissors, nails: Sparkles, makeup: Star, skincare: Heart,
+  eyebrows: Eye, lashes: Zap, massage: Crown, bridal: Crown,
+}
 
-const categoryIcons: Record<string, React.ElementType> = {
-  hair: Scissors,
-  nails: Sparkles,
-  makeup: Star,
-  skincare: Heart,
-  eyebrows: Eye,
-  lashes: Zap,
-  massage: Crown,
-  bridal: Crown,
-};
-
+// ─── MAIN PAGE ─────────────────────────────────────────────────────────────
 export default function HomePage() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { lang, isAr, t } = useLang()
+  const [slide, setSlide] = useState(0)
+  const [city, setCity] = useState('')
+  const [service, setService] = useState('')
+  const s = translations.sections
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+    const timer = setInterval(() => setSlide(p => (p + 1) % heroSlides.length), 6000)
+    return () => clearInterval(timer)
+  }, [])
 
-  const featuredSalons = getFeaturedSalons();
-  const topRated = [...salons].sort((a, b) => b.rating - a.rating).slice(0, 3);
+  const featuredSalons = getFeaturedSalons()
+  const topRated = [...salons].sort((a, b) => b.rating - a.rating).slice(0, 6)
+  const flashOffers = offers.slice(0, 4)
+  const current = heroSlides[slide]
 
   return (
-    <div className="min-h-screen bg-glamora-dark">
+    <div className="min-h-screen bg-[#1A0A2E]" dir={isAr ? 'rtl' : 'ltr'}>
 
-      {/* HERO */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0"
-          >
+      {/* ══════════ HERO ══════════ */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+
+        {/* Background Image with smooth crossfade */}
+        <AnimatePresence mode="sync">
+          <motion.div key={slide} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 1.2 }} className="absolute inset-0">
             <Image
-              src={heroSlides[currentSlide].image}
-              alt="Hero"
+              src={current.image}
+              alt="Beauty salon"
               fill
               className="object-cover"
               priority
-              sizes="100vw"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = current.fallback }}
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-glamora-dark/70 via-glamora-dark/50 to-glamora-dark" />
+            {/* Layered overlays for depth */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1A0A2E]/95 via-[#1A0A2E]/70 to-[#1A0A2E]/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1A0A2E]/80 via-transparent to-transparent" />
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-glamora-gold/10 blur-3xl animate-float pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-glamora-pink/10 blur-3xl animate-float-delay pointer-events-none" />
+        {/* Animated luxury orbs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-glamora-gold/10 rounded-full blur-3xl animate-pulse-slow" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-glamora-pink/10 rounded-full blur-3xl animate-float" />
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-purple-500/8 rounded-full blur-3xl animate-float-delay" />
+        </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 text-center w-full">
-          <motion.div
-            key={`content-${currentSlide}`}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-          >
-            <div className="inline-flex items-center gap-2 bg-glamora-gold/10 border border-glamora-gold/30 rounded-full px-4 py-1.5 mb-6">
-              <Sparkles className="w-4 h-4 text-glamora-gold" />
-              <span className="text-glamora-gold text-sm font-medium">Saudi Arabia&apos;s #1 Beauty Marketplace</span>
-            </div>
+        {/* Content */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+          <div className="max-w-3xl">
+            <AnimatePresence mode="wait">
+              <motion.div key={slide} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.7 }}>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold mb-6 leading-tight">
-              <span className="block">{heroSlides[currentSlide].title}</span>
-              <span className="block text-gold-gradient">{heroSlides[currentSlide].titleAccent}</span>
-            </h1>
+                {/* Badge */}
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}
+                  className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-2 mb-6">
+                  <span className={cn('text-white/90 text-sm', isAr && 'font-tajawal')}>{current.badge[lang]}</span>
+                </motion.div>
 
-            <p className="text-white/60 text-base mb-2" dir="rtl">
-              {heroSlides[currentSlide].subtitleAr}
-            </p>
-            <p className="text-white/70 text-lg sm:text-xl mb-10 max-w-2xl mx-auto">
-              {heroSlides[currentSlide].subtitle}
-            </p>
+                {/* Title */}
+                <h1 className={cn('text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] mb-4', isAr && 'font-tajawal text-right lg:text-6xl')}>
+                  {current.title[lang]}{' '}
+                  <span className={cn('bg-gradient-to-r bg-clip-text text-transparent', current.accent1Color)}>
+                    {current.accent[lang]}
+                  </span>
+                </h1>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Link href="/booking">
-                <Button size="xl" className="w-full sm:w-auto shadow-xl shadow-glamora-gold/20">
-                  <Calendar className="w-5 h-5" />
-                  {heroSlides[currentSlide].cta}
-                </Button>
-              </Link>
-              <Link href="/salons">
-                <Button variant="outline" size="xl" className="w-full sm:w-auto">
-                  {heroSlides[currentSlide].ctaSecondary}
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-            </div>
+                {/* Subtitle */}
+                <p className={cn('text-white/70 text-lg sm:text-xl leading-relaxed mb-8 max-w-2xl', isAr && 'font-tajawal text-right')}>
+                  {current.subtitle[lang]}
+                </p>
 
-            <div className="max-w-2xl mx-auto bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-2 flex flex-col sm:flex-row gap-2">
-              <div className="flex items-center gap-2 flex-1 bg-white/5 rounded-xl px-4 py-3">
-                <Search className="w-4 h-4 text-glamora-gold flex-shrink-0" />
-                <input placeholder="Service or salon..." className="bg-transparent text-white placeholder:text-white/30 text-sm outline-none w-full" />
+                {/* CTA Buttons */}
+                <div className={cn('flex flex-wrap gap-4 mb-12', isAr && 'justify-end sm:justify-start')}>
+                  <Link href="/salons"
+                    className={cn('inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-glamora-gold to-amber-400 text-black font-bold rounded-2xl hover:opacity-90 transition-all shadow-2xl shadow-glamora-gold/30 hover:shadow-glamora-gold/50 hover:-translate-y-0.5 text-sm sm:text-base', isAr && 'font-tajawal flex-row-reverse')}>
+                    {current.cta1[lang]}
+                    <ArrowRight className={cn('w-5 h-5', isAr && 'rotate-180')} />
+                  </Link>
+                  <Link href="/offers"
+                    className={cn('inline-flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md border border-white/25 text-white font-semibold rounded-2xl hover:bg-white/20 transition-all text-sm sm:text-base', isAr && 'font-tajawal flex-row-reverse')}>
+                    {current.cta2[lang]}
+                    <Play className="w-4 h-4 fill-white" />
+                  </Link>
+                </div>
+
+                {/* Trust badges */}
+                <div className={cn('flex flex-wrap gap-5', isAr && 'justify-end sm:justify-start')}>
+                  {[
+                    { icon: Shield, en: '100% Verified Salons',    ar: '١٠٠٪ صالونات معتمدة' },
+                    { icon: Award,  en: 'Best Price Guarantee',    ar: 'ضمان أفضل سعر' },
+                    { icon: CheckCircle, en: 'Instant Confirmation', ar: 'تأكيد فوري' },
+                  ].map(b => (
+                    <div key={b.en} className="flex items-center gap-2">
+                      <b.icon className="w-4 h-4 text-glamora-gold" />
+                      <span className={cn('text-white/60 text-xs', isAr && 'font-tajawal')}>{isAr ? b.ar : b.en}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Search Box */}
+          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+            className="mt-12 bg-white/8 backdrop-blur-xl border border-white/15 rounded-3xl p-4 sm:p-5 shadow-2xl max-w-4xl">
+            <div className={cn('flex flex-col sm:flex-row gap-3', isAr && 'sm:flex-row-reverse')}>
+              {/* City */}
+              <div className="flex-1 relative">
+                <MapPin className={cn('absolute top-1/2 -translate-y-1/2 w-4 h-4 text-glamora-gold', isAr ? 'right-3' : 'left-3')} />
+                <input value={city} onChange={e => setCity(e.target.value)}
+                  placeholder={isAr ? 'المدينة أو الحي' : 'City or district'}
+                  className={cn('w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 text-white text-sm focus:outline-none focus:border-glamora-gold/50 placeholder:text-white/30', isAr ? 'pr-10 pl-4 text-right font-tajawal' : 'pl-10 pr-4')} />
               </div>
-              <div className="flex items-center gap-2 flex-1 bg-white/5 rounded-xl px-4 py-3 border-l border-white/10">
-                <MapPin className="w-4 h-4 text-glamora-gold flex-shrink-0" />
-                <input placeholder="Location in Riyadh..." className="bg-transparent text-white placeholder:text-white/30 text-sm outline-none w-full" />
+              {/* Service */}
+              <div className="flex-1 relative">
+                <Scissors className={cn('absolute top-1/2 -translate-y-1/2 w-4 h-4 text-glamora-gold', isAr ? 'right-3' : 'left-3')} />
+                <input value={service} onChange={e => setService(e.target.value)}
+                  placeholder={isAr ? 'الخدمة المطلوبة' : 'Service (e.g. Hair color)'}
+                  className={cn('w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 text-white text-sm focus:outline-none focus:border-glamora-gold/50 placeholder:text-white/30', isAr ? 'pr-10 pl-4 text-right font-tajawal' : 'pl-10 pr-4')} />
               </div>
-              <Button className="px-6 flex-shrink-0">Search</Button>
+              {/* Date */}
+              <div className="flex-1 relative">
+                <Calendar className={cn('absolute top-1/2 -translate-y-1/2 w-4 h-4 text-glamora-gold', isAr ? 'right-3' : 'left-3')} />
+                <input type="date"
+                  className={cn('w-full bg-white/5 border border-white/10 rounded-2xl py-3.5 text-white/60 text-sm focus:outline-none focus:border-glamora-gold/50', isAr ? 'pr-10 pl-4' : 'pl-10 pr-4')} />
+              </div>
+              {/* Search button */}
+              <Link href={`/search?city=${city}&service=${service}`}
+                className={cn('flex items-center justify-center gap-2 px-8 py-3.5 bg-gradient-to-r from-glamora-gold to-glamora-pink text-white font-bold rounded-2xl hover:opacity-90 transition-all whitespace-nowrap shadow-lg shadow-glamora-gold/20', isAr && 'font-tajawal flex-row-reverse')}>
+                <Search className="w-5 h-5" />
+                {isAr ? 'بحث' : 'Search'}
+              </Link>
+            </div>
+            {/* Quick tags */}
+            <div className={cn('flex gap-2 mt-3 flex-wrap', isAr && 'flex-row-reverse justify-end')}>
+              <span className={cn('text-white/40 text-xs self-center', isAr && 'font-tajawal')}>
+                {isAr ? 'شائع:' : 'Popular:'}
+              </span>
+              {(isAr
+                ? ['قص الشعر', 'مانيكير', 'مكياج', 'علاج البشرة', 'عرائس', 'رموش']
+                : ['Hair Cut', 'Manicure', 'Makeup', 'Facial', 'Bridal', 'Lashes']
+              ).map(tag => (
+                <button key={tag} onClick={() => setService(tag)}
+                  className={cn('text-xs px-3 py-1 border border-white/10 text-white/50 rounded-full hover:border-glamora-gold/40 hover:text-glamora-gold transition-all', isAr && 'font-tajawal')}>
+                  {tag}
+                </button>
+              ))}
             </div>
           </motion.div>
+        </div>
 
-          <div className="flex items-center justify-center gap-2 mt-8">
-            {heroSlides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentSlide(i)}
-                className={cn(
-                  "rounded-full transition-all duration-300",
-                  i === currentSlide ? "w-8 h-2 bg-glamora-gold" : "w-2 h-2 bg-white/30"
-                )}
-              />
+        {/* Slide indicators */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
+          {heroSlides.map((_, i) => (
+            <button key={i} onClick={() => setSlide(i)}
+              className={cn('h-1.5 rounded-full transition-all duration-300', i === slide ? 'w-8 bg-glamora-gold' : 'w-2 bg-white/30 hover:bg-white/50')} />
+          ))}
+        </div>
+
+        {/* Prev / Next arrows */}
+        <button onClick={() => setSlide(p => (p - 1 + heroSlides.length) % heroSlides.length)}
+          className={cn('absolute top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all', isAr ? 'right-6' : 'left-6')}>
+          <ChevronLeft className={cn('w-5 h-5', isAr && 'rotate-180')} />
+        </button>
+        <button onClick={() => setSlide(p => (p + 1) % heroSlides.length)}
+          className={cn('absolute top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white/20 transition-all', isAr ? 'left-6' : 'right-6')}>
+          <ChevronRight className={cn('w-5 h-5', isAr && 'rotate-180')} />
+        </button>
+      </section>
+
+      {/* ══════════ ANIMATED STATS ══════════ */}
+      <section className="py-12 bg-gradient-to-r from-glamora-gold/5 via-transparent to-glamora-pink/5 border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { value: 500, suffix: '+', en: 'Verified Salons',   ar: 'صالون معتمد',   icon: '💎' },
+              { value: 50000, suffix: '+', en: 'Happy Bookings',  ar: 'حجز ناجح',      icon: '📅' },
+              { value: 30000, suffix: '+', en: 'Loyal Customers', ar: 'عميلة وفية',    icon: '👑' },
+              { value: 4.9, suffix: '★',   en: 'Average Rating',  ar: 'متوسط التقييم', icon: '⭐' },
+            ].map((stat, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className="text-center">
+                <div className="text-3xl mb-1">{stat.icon}</div>
+                <div className="text-3xl lg:text-4xl font-bold text-glamora-gold">
+                  {stat.suffix === '★'
+                    ? <>{stat.value}{stat.suffix}</>
+                    : <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+                  }
+                </div>
+                <div className={cn('text-white/50 text-sm mt-1', isAr && 'font-tajawal')}>
+                  {isAr ? stat.ar : stat.en}
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
-
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30"
-        >
-          <span className="text-xs">Scroll to explore</span>
-          <div className="w-5 h-8 border border-white/20 rounded-full flex items-start justify-center pt-1">
-            <div className="w-1 h-2 bg-glamora-gold rounded-full" />
-          </div>
-        </motion.div>
       </section>
 
-      {/* CATEGORIES */}
-      <section className="py-20 px-4">
+      {/* ══════════ CATEGORIES ══════════ */}
+      <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">Browse by <span className="text-gold-gradient">Category</span></h2>
-            <p className="text-white/50">Find your perfect beauty service</p>
-          </motion.div>
-          <div className="flex gap-4 overflow-x-auto pb-4">
-            {categories.map((cat, i) => {
-              const Icon = categoryIcons[cat.id] || Sparkles;
+          <SectionHeader title={s.categories[lang]} link="/salons" linkText={s.viewAll[lang]} isAr={isAr} />
+          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+            {categories.slice(0, 8).map((cat, i) => {
+              const Icon = catIcons[cat.id] ?? Sparkles
               return (
-                <motion.div key={cat.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.07 }} viewport={{ once: true }} whileHover={{ scale: 1.05, y: -4 }} className="flex-shrink-0">
-                  <Link href={`/salons?category=${cat.id}`}>
-                    <div className="w-28 sm:w-32 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-3 hover:border-glamora-gold/40 transition-all duration-300 cursor-pointer">
-                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${cat.gradient} flex items-center justify-center shadow-lg`}>
-                        <Icon className="w-7 h-7 text-white" />
-                      </div>
-                      <div className="text-center">
-                        <p className="text-white font-medium text-sm">{cat.name.en}</p>
-                        <p className="text-white/50 text-xs" dir="rtl">{cat.name.ar}</p>
-                        <p className="text-glamora-gold text-xs mt-1">{cat.count}+</p>
-                      </div>
+                <motion.div key={cat.id} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
+                  <Link href={`/categories/${cat.id}`}
+                    className="group flex flex-col items-center gap-2 p-4 bg-white/5 border border-white/10 rounded-2xl hover:border-glamora-gold/40 hover:bg-glamora-gold/5 transition-all duration-300 hover:-translate-y-1">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-glamora-gold/20 to-glamora-pink/20 flex items-center justify-center group-hover:from-glamora-gold/30 group-hover:to-glamora-pink/30 transition-all">
+                      <Icon className="w-6 h-6 text-glamora-gold" />
                     </div>
+                    <span className={cn('text-white/70 text-xs text-center font-medium group-hover:text-white transition-colors leading-tight', isAr && 'font-tajawal')}>
+                      {isAr ? cat.name.ar : cat.name.en}
+                    </span>
                   </Link>
                 </motion.div>
-              );
+              )
             })}
           </div>
         </div>
       </section>
 
-      {/* FEATURED SALONS */}
-      <section className="py-20 px-4 bg-glamora-dark-2">
+      {/* ══════════ FEATURED SALONS ══════════ */}
+      <section className="py-16 px-4 bg-gradient-to-b from-transparent to-white/2">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-2">Featured <span className="text-gold-gradient">Salons</span></h2>
-              <p className="text-white/50">Hand-picked top salons in Riyadh</p>
-            </motion.div>
-            <Link href="/salons"><Button variant="outline" size="sm" className="hidden sm:flex">View All <ChevronRight className="w-4 h-4" /></Button></Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredSalons.map((salon, i) => <SalonCard key={salon.id} salon={salon} index={i} />)}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/salons"><Button variant="outline" size="lg">Explore All 500+ Salons <ArrowRight className="w-4 h-4" /></Button></Link>
+          <SectionHeader title={s.featuredSalons[lang]} subtitle={isAr ? 'صالونات مميزة اختارها خبراؤنا لك' : 'Handpicked by our beauty experts'} link="/salons" linkText={s.viewAll[lang]} isAr={isAr} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {getFeaturedSalons().map((salon, i) => <SalonCard key={salon.id} salon={salon} index={i} />)}
           </div>
         </div>
       </section>
 
-      {/* TODAY'S OFFERS */}
-      <section className="py-20 px-4">
+      {/* ══════════ TODAY'S OFFERS ══════════ */}
+      <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-full px-3 py-1 mb-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                <span className="text-red-400 text-xs font-medium">Limited Time Deals</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-2">Today&apos;s <span className="text-gold-gradient">Offers</span></h2>
-              <p className="text-white/50">Flash deals ending soon!</p>
-            </motion.div>
+          <SectionHeader title={s.todayOffers[lang]} subtitle={isAr ? 'عروض لفترة محدودة — لا تفوّتيها!' : 'Limited time offers — Don\'t miss out!'} link="/offers" linkText={s.viewAll[lang]} isAr={isAr} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {offers.slice(0, 4).map((offer, i) => {
+              const expiresAt = new Date(Date.now() + (8 - i) * 3600000 + i * 1800000).toISOString()
+              return (
+                <motion.div key={offer.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  className="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-glamora-pink/30 hover:-translate-y-1 transition-all duration-300">
+                  <div className="relative h-44 overflow-hidden">
+                    <Image src={offer.image} alt={offer.title.en} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="25vw" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    {/* Discount badge */}
+                    <div className="absolute top-3 right-3 bg-glamora-pink text-white font-black text-lg px-2.5 py-1 rounded-xl shadow-lg">
+                      -{offer.discount}%
+                    </div>
+                    {/* Countdown */}
+                    <div className="absolute bottom-3 left-3">
+                      <div className={cn('text-white/60 text-xs mb-1', isAr && 'font-tajawal text-right')}>{isAr ? 'ينتهي خلال' : 'Ends in'}</div>
+                      <CountdownTimer expiresAt={expiresAt} />
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h3 className={cn('text-white font-semibold text-sm mb-1 line-clamp-1', isAr && 'font-tajawal text-right')}>
+                      {isAr ? offer.title.ar : offer.title.en}
+                    </h3>
+                    <div className={cn('flex items-center gap-2 mb-3', isAr && 'flex-row-reverse')}>
+                      <span className="text-white/40 text-xs line-through">SAR {offer.originalPrice}</span>
+                      <span className="text-glamora-gold font-bold">SAR {offer.discountedPrice}</span>
+                    </div>
+                    <Link href="/booking"
+                      className={cn('block w-full text-center py-2 bg-gradient-to-r from-glamora-pink/80 to-glamora-gold/80 text-white rounded-xl text-xs font-semibold hover:opacity-90 transition-opacity', isAr && 'font-tajawal')}>
+                      {s.bookNow[lang]}
+                    </Link>
+                  </div>
+                </motion.div>
+              )
+            })}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {offers.slice(0, 8).map((offer, i) => (
-              <motion.div key={offer.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} viewport={{ once: true }} className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:border-glamora-gold/30 transition-all duration-300">
-                <div className="relative h-40 overflow-hidden">
-                  <Image src={offer.image} alt={offer.title.en} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 300px" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-glamora-dark/90 to-transparent" />
-                  <div className="absolute top-3 left-3">
-                    <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
-                      <Percent className="w-3 h-3" />{offer.discount}% OFF
+        </div>
+      </section>
+
+      {/* ══════════ LUXURY BANNER ══════════ */}
+      <section className="py-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <motion.div initial={{ opacity: 0, scale: 0.98 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+            className="relative rounded-3xl overflow-hidden h-64 sm:h-80">
+            <Image
+              src="https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=1920&q=80"
+              alt="Luxury collection"
+              fill className="object-cover"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).src = 'https://picsum.photos/seed/luxury-banner/1920/600' }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1A0A2E]/90 via-[#1A0A2E]/60 to-transparent" />
+            <div className={cn('absolute inset-0 flex flex-col justify-center px-8 sm:px-12', isAr && 'items-end text-right')}>
+              <div className="inline-flex items-center gap-2 bg-glamora-gold/20 border border-glamora-gold/40 rounded-full px-3 py-1 mb-4">
+                <Crown className="w-4 h-4 text-glamora-gold" />
+                <span className={cn('text-glamora-gold text-xs font-semibold', isAr && 'font-tajawal')}>{isAr ? 'مجموعة VIP الحصرية' : 'Exclusive VIP Collection'}</span>
+              </div>
+              <h2 className={cn('text-3xl sm:text-4xl font-bold text-white mb-3', isAr && 'font-tajawal')}>
+                {isAr ? 'صالونات فاخرة لكل مناسبة' : 'Luxury Salons for Every Occasion'}
+              </h2>
+              <p className={cn('text-white/60 text-sm sm:text-base max-w-md mb-6', isAr && 'font-tajawal')}>
+                {isAr ? 'تجربة تجميل لا مثيل لها في أرقى صالونات المملكة' : 'An unmatched beauty experience at the finest salons in the Kingdom'}
+              </p>
+              <Link href="/salons?luxury=true"
+                className={cn('inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-glamora-gold to-amber-400 text-black font-bold rounded-xl hover:opacity-90 transition-opacity shadow-lg', isAr && 'font-tajawal flex-row-reverse')}>
+                {isAr ? 'استكشفي المجموعة الفاخرة' : 'Explore Luxury Collection'}
+                <ArrowRight className={cn('w-4 h-4', isAr && 'rotate-180')} />
+              </Link>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ══════════ BEST RATED ══════════ */}
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader title={s.bestRated[lang]} subtitle={isAr ? 'الأكثر تقييماً من قِبَل عميلاتنا' : 'Top-rated by our customers'} link="/salons" linkText={s.viewAll[lang]} isAr={isAr} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {topRated.slice(0, 6).map((salon, i) => <SalonCard key={salon.id} salon={salon as any} index={i} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ BEAUTY PACKAGES ══════════ */}
+      <section className="py-16 px-4 bg-gradient-to-b from-transparent to-white/2">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader title={s.packages[lang]} subtitle={isAr ? 'باقات شاملة بأسعار استثنائية' : 'Comprehensive packages at exceptional prices'} link="/salons" linkText={s.viewAll[lang]} isAr={isAr} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {packages.slice(0, 3).map((pkg, i) => (
+              <motion.div key={pkg.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-glamora-gold/30 hover:-translate-y-1 transition-all duration-300">
+                <div className="relative h-48">
+                  <Image src={pkg.image} alt={pkg.name.en} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="33vw" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {pkg.services.slice(0, 3).map(svc => (
+                        <span key={svc} className="text-xs bg-white/20 backdrop-blur-sm text-white px-2 py-0.5 rounded-full">{svc}</span>
+                      ))}
+                      {pkg.services.length > 3 && <span className="text-xs text-white/50">+{pkg.services.length - 3}</span>}
                     </div>
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-white text-sm mb-1 line-clamp-1">{offer.title.en}</h3>
-                  <p className="text-white/50 text-xs mb-3">{offer.salonName}</p>
-                  <div className="flex items-center justify-between mb-3">
+                  <h3 className={cn('text-white font-semibold mb-1', isAr && 'font-tajawal text-right')}>{isAr ? pkg.name.ar : pkg.name.en}</h3>
+                  <p className={cn('text-white/50 text-xs mb-3 line-clamp-2', isAr && 'font-tajawal text-right')}>{isAr ? pkg.description.ar : pkg.description.en}</p>
+                  <div className={cn('flex items-center justify-between', isAr && 'flex-row-reverse')}>
                     <div>
-                      <span className="text-glamora-gold font-bold">SAR {offer.discountedPrice}</span>
-                      <span className="text-white/30 text-xs line-through ml-2">SAR {offer.originalPrice}</span>
+                      <div className="text-white/30 text-xs line-through">SAR {pkg.originalPrice}</div>
+                      <div className="text-glamora-gold font-bold text-lg">SAR {pkg.price}</div>
                     </div>
+                    <span className="text-xs bg-glamora-pink/20 border border-glamora-pink/30 text-glamora-pink px-2 py-1 rounded-full font-semibold">
+                      {isAr ? `وفّري SAR ${pkg.originalPrice - pkg.price}` : `Save SAR ${pkg.originalPrice - pkg.price}`}
+                    </span>
                   </div>
-                  <CountdownTimer expiresAt={offer.expiresAt} />
-                  <Link href={`/salons/${offer.salonId}`}>
-                    <Button size="sm" className="w-full mt-3">Grab Deal</Button>
+                  <Link href="/booking" className={cn('mt-3 block w-full text-center py-2.5 bg-gradient-to-r from-glamora-gold to-glamora-pink text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity', isAr && 'font-tajawal')}>
+                    {s.bookNow[lang]}
                   </Link>
                 </div>
               </motion.div>
@@ -394,34 +525,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* POPULAR SERVICES */}
-      <section className="py-20 px-4 bg-glamora-dark-2">
+      {/* ══════════ TESTIMONIALS ══════════ */}
+      <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">Popular <span className="text-gold-gradient">Services</span></h2>
-            <p className="text-white/50">Most-booked beauty services right now</p>
-          </motion.div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <SectionHeader title={s.testimonials[lang]} isAr={isAr} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {reviews.slice(0, 6).map((review, i) => (
+              <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-white/20 transition-all">
+                <div className="flex gap-0.5 mb-3">
+                  {[1,2,3,4,5].map(s => <Star key={s} className={cn('w-4 h-4', s <= review.rating ? 'text-glamora-gold fill-glamora-gold' : 'text-white/20')} />)}
+                </div>
+                <p className={cn('text-white/70 text-sm leading-relaxed mb-4 line-clamp-3', isAr && 'font-tajawal text-right')}>
+                  {isAr ? review.comment.ar : review.comment.en}
+                </p>
+                <div className={cn('flex items-center gap-3', isAr && 'flex-row-reverse')}>
+                  <Image src={review.customerAvatar} alt={review.customerName} width={36} height={36} className="rounded-full object-cover" />
+                  <div>
+                    <div className={cn('text-white text-sm font-semibold', isAr && 'font-tajawal text-right')}>{review.customerName}</div>
+                    <div className="text-white/30 text-xs">{review.service}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════ POPULAR SERVICES ══════════ */}
+      <section className="py-16 px-4 bg-gradient-to-b from-transparent to-white/2">
+        <div className="max-w-7xl mx-auto">
+          <SectionHeader title={s.popularServices[lang]} isAr={isAr} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
-              { icon: Scissors, name: "Balayage", count: "2.3k bookings", color: "from-amber-500 to-orange-600" },
-              { icon: Sparkles, name: "Gel Manicure", count: "1.8k bookings", color: "from-pink-500 to-rose-600" },
-              { icon: Star, name: "Bridal Makeup", count: "1.2k bookings", color: "from-purple-500 to-violet-600" },
-              { icon: Heart, name: "HydraFacial", count: "980 bookings", color: "from-emerald-500 to-teal-600" },
-              { icon: Eye, name: "Microblading", count: "870 bookings", color: "from-blue-500 to-cyan-600" },
-              { icon: Zap, name: "Lash Extensions", count: "760 bookings", color: "from-red-500 to-pink-600" },
-              { icon: Crown, name: "Swedish Massage", count: "650 bookings", color: "from-teal-500 to-green-600" },
-              { icon: Scissors, name: "Keratin Treatment", count: "540 bookings", color: "from-yellow-500 to-amber-600" },
-            ].map((service, i) => (
-              <motion.div key={service.name} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.06 }} viewport={{ once: true }} whileHover={{ scale: 1.03, y: -3 }}>
-                <Link href="/salons">
-                  <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 flex flex-col items-center gap-3 hover:border-glamora-gold/30 transition-all duration-300 cursor-pointer text-center">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${service.color} flex items-center justify-center shadow-lg`}>
-                      <service.icon className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium text-sm">{service.name}</p>
-                      <p className="text-glamora-gold text-xs">{service.count}</p>
-                    </div>
+              { en: 'Hair Color',   ar: 'صبغ الشعر',    img: 'https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=400&q=80', count: '1.2k' },
+              { en: 'Nail Art',     ar: 'فن الأظافر',   img: 'https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=400&q=80', count: '980' },
+              { en: 'Facial',       ar: 'العناية بالبشرة', img: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?auto=format&fit=crop&w=400&q=80', count: '856' },
+              { en: 'Blow Dry',     ar: 'تجفيف الشعر',  img: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80', count: '743' },
+              { en: 'Makeup',       ar: 'المكياج',       img: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?auto=format&fit=crop&w=400&q=80', count: '692' },
+              { en: 'Lashes',       ar: 'الرموش',        img: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=400&q=80', count: '578' },
+            ].map((svc, i) => (
+              <motion.div key={svc.en} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.06 }}>
+                <Link href={`/search?service=${svc.en}`}
+                  className="group relative block h-32 rounded-2xl overflow-hidden border border-white/10 hover:border-glamora-gold/40 transition-all hover:-translate-y-1">
+                  <Image src={svc.img} alt={svc.en} fill className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://picsum.photos/seed/${svc.en}/400/300` }}
+                    sizes="200px" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/10" />
+                  <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                    <div className={cn('text-white text-xs font-semibold', isAr && 'font-tajawal text-right')}>{isAr ? svc.ar : svc.en}</div>
+                    <div className="text-white/40 text-[10px]">{svc.count} {isAr ? 'حجز' : 'bookings'}</div>
                   </div>
                 </Link>
               </motion.div>
@@ -430,242 +583,75 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* LUXURY COLLECTION BANNER */}
-      <section className="py-20 px-4">
+      {/* ══════════ PARTNER BANNER ══════════ */}
+      <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="relative rounded-3xl overflow-hidden min-h-80">
-            <Image src="https://picsum.photos/seed/luxury-banner/1400/600" alt="Luxury Collection" fill className="object-cover" sizes="100vw" />
-            <div className="absolute inset-0 bg-gradient-to-r from-glamora-dark via-glamora-dark/70 to-transparent" />
-            <div className="relative z-10 p-10 sm:p-16 max-w-xl">
-              <Badge variant="gold" className="mb-4">✨ Exclusive Collection</Badge>
-              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-4">The Luxury<br /><span className="text-gold-gradient">VIP Experience</span></h2>
-              <p className="text-white/70 mb-8 leading-relaxed">Discover Riyadh&apos;s most exclusive salons offering private suites, VIP packages, and personalized beauty experiences fit for royalty.</p>
-              <Link href="/salons"><Button size="lg" className="shadow-xl shadow-glamora-gold/30"><Crown className="w-5 h-5" />Explore VIP Salons</Button></Link>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="bg-gradient-to-br from-glamora-gold/10 via-glamora-pink/5 to-purple-500/10 border border-glamora-gold/20 rounded-3xl p-8 sm:p-12 text-center relative overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-glamora-gold/5 rounded-full blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-glamora-pink/5 rounded-full blur-3xl" />
             </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* BEST RATED */}
-      <section className="py-20 px-4 bg-glamora-dark-2">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-2">Best <span className="text-gold-gradient">Rated</span></h2>
-              <p className="text-white/50">Top-rated by thousands of happy customers</p>
-            </motion.div>
-            <Link href="/salons"><Button variant="outline" size="sm" className="hidden sm:flex">View All</Button></Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {topRated.map((salon, i) => (
-              <motion.div key={salon.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 flex gap-4 hover:border-glamora-gold/30 transition-all duration-300 group">
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                  <Image src={salon.cover} alt={salon.name.en} fill className="object-cover group-hover:scale-105 transition-transform" sizes="80px" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-semibold text-white text-sm truncate">{salon.name.en}</h3>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <Star className="w-3 h-3 fill-glamora-gold text-glamora-gold" />
-                      <span className="text-glamora-gold text-xs font-bold">{salon.rating}</span>
-                    </div>
-                  </div>
-                  <p className="text-white/50 text-xs mb-2">{salon.reviewsCount} reviews</p>
-                  <p className="text-white/50 text-xs flex items-center gap-1 mb-3"><MapPin className="w-3 h-3" /> {salon.neighborhood}</p>
-                  <Link href={`/salons/${salon.id}`}><Button size="sm" variant="outline" className="text-xs h-7 px-3">Book Now</Button></Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* BEAUTY PACKAGES */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">Beauty <span className="text-gold-gradient">Packages</span></h2>
-            <p className="text-white/50">All-inclusive packages for every occasion</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {packages.map((pkg, i) => (
-              <motion.div key={pkg.id} initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.15 }} viewport={{ once: true }} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:border-glamora-gold/30 transition-all duration-300 group">
-                <div className="relative h-48 overflow-hidden">
-                  <Image src={pkg.image} alt={pkg.name.en} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 33vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-glamora-dark/90 to-transparent" />
-                  <div className="absolute bottom-4 left-4">
-                    <p className="text-white font-bold text-lg">{pkg.name.en}</p>
-                  </div>
-                  <div className="absolute top-3 right-3">
-                    <div className="bg-glamora-gold/20 border border-glamora-gold/40 rounded-full px-2 py-1 text-glamora-gold text-xs">Save SAR {pkg.originalPrice - pkg.price}</div>
-                  </div>
-                </div>
-                <div className="p-5">
-                  <p className="text-white/60 text-sm mb-4">{pkg.description.en}</p>
-                  <div className="space-y-1.5 mb-5">
-                    {pkg.services.map((svc) => (
-                      <div key={svc} className="flex items-center gap-2 text-white/70 text-sm">
-                        <CheckCircle className="w-4 h-4 text-glamora-gold flex-shrink-0" />
-                        <span>{svc}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <span className="text-glamora-gold font-bold text-xl">SAR {pkg.price}</span>
-                      <span className="text-white/30 text-sm line-through ml-2">SAR {pkg.originalPrice}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-white/50 text-xs"><Clock className="w-3 h-3" />{pkg.duration} min</div>
-                  </div>
-                  <Link href="/booking"><Button className="w-full">Book Package</Button></Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TESTIMONIALS */}
-      <section className="py-20 px-4 bg-glamora-dark-2">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-3">What Our <span className="text-gold-gradient">Clients Say</span></h2>
-            <p className="text-white/50">Real reviews from real beauty enthusiasts</p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {reviews.slice(0, 4).map((review, i) => (
-              <motion.div key={review.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5">
-                <Rating value={review.rating} size="sm" className="mb-3" />
-                <p className="text-white/70 text-sm leading-relaxed mb-4 line-clamp-3">&ldquo;{review.comment.en}&rdquo;</p>
-                <div className="flex items-center gap-3">
-                  <Avatar src={review.customerAvatar} name={review.customerName} size="sm" />
-                  <div>
-                    <p className="text-white font-medium text-sm">{review.customerName}</p>
-                    <p className="text-glamora-gold text-xs">{review.service}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section className="py-16 px-4 border-y border-white/5">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: Building2, value: 500, suffix: "+", label: "Salons", labelAr: "صالون" },
-              { icon: Calendar, value: 50000, suffix: "+", label: "Bookings", labelAr: "حجز" },
-              { icon: Star, value: 49, suffix: "", label: "4.9★ Rating", labelAr: "متوسط التقييم" },
-              { icon: MapPin, value: 100, suffix: "+", label: "Areas", labelAr: "منطقة" },
-            ].map((stat, i) => (
-              <motion.div key={stat.label} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }} className="text-center">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-glamora-gold/20 to-glamora-pink/20 border border-glamora-gold/20 flex items-center justify-center mx-auto mb-3">
-                  <stat.icon className="w-6 h-6 text-glamora-gold" />
-                </div>
-                <div className="text-4xl font-bold text-white mb-1">
-                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                </div>
-                <p className="text-white/60 text-sm">{stat.label}</p>
-                <p className="text-white/40 text-xs" dir="rtl">{stat.labelAr}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PARTNER CTA */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <Badge variant="pink" className="mb-4">For Salon Owners</Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-4">Grow Your <span className="text-gold-gradient">Beauty Business</span></h2>
-              <p className="text-white/60 mb-6 leading-relaxed">Join Glamora and reach thousands of beauty enthusiasts across Saudi Arabia. Get more bookings, manage your schedule, and grow your revenue.</p>
-              <div className="space-y-3 mb-8">
-                {["Access 50,000+ active customers", "Smart booking management system", "Analytics and revenue insights", "Marketing and promotion tools", "24/7 customer support"].map((benefit) => (
-                  <div key={benefit} className="flex items-center gap-3 text-white/70">
-                    <CheckCircle className="w-5 h-5 text-glamora-gold flex-shrink-0" />
-                    <span className="text-sm">{benefit}</span>
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 bg-glamora-gold/20 border border-glamora-gold/30 rounded-full px-4 py-2 mb-5">
+                <Award className="w-4 h-4 text-glamora-gold" />
+                <span className={cn('text-glamora-gold text-sm font-semibold', isAr && 'font-tajawal')}>{isAr ? 'لأصحاب الصالونات' : 'For Salon Owners'}</span>
+              </div>
+              <h2 className={cn('text-3xl sm:text-4xl font-bold text-white mb-4', isAr && 'font-tajawal')}>
+                {isAr ? 'طوّري صالونك مع غلامورا' : 'Grow Your Salon with Glamora'}
+              </h2>
+              <p className={cn('text-white/60 text-lg max-w-2xl mx-auto mb-8', isAr && 'font-tajawal')}>
+                {isAr ? 'انضم إلى أكثر من ٥٠٠ صالون وابدأ في استقبال حجوزات جديدة من عملاء مميزين عبر منصتنا' : 'Join 500+ salons and start receiving new bookings from premium customers through our platform'}
+              </p>
+              <div className="flex flex-wrap justify-center gap-6 mb-8">
+                {[
+                  { en: 'More Bookings',    ar: 'حجوزات أكثر',     icon: Calendar },
+                  { en: 'Easy Management',  ar: 'إدارة سهلة',       icon: CheckCircle },
+                  { en: 'Real Analytics',   ar: 'تحليلات حقيقية',   icon: Star },
+                  { en: 'Free Marketing',   ar: 'تسويق مجاني',      icon: Sparkles },
+                ].map(f => (
+                  <div key={f.en} className="flex items-center gap-2">
+                    <f.icon className="w-5 h-5 text-glamora-gold" />
+                    <span className={cn('text-white/70 text-sm', isAr && 'font-tajawal')}>{isAr ? f.ar : f.en}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex gap-3">
-                <Link href="/dashboard"><Button size="lg">Get Started Free</Button></Link>
-                <Button variant="outline" size="lg">Learn More</Button>
-              </div>
-            </motion.div>
-            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8">
-                <div className="grid grid-cols-2 gap-4">
-                  {[{ label: "New Clients/Mo", value: "+127" }, { label: "Revenue Growth", value: "+43%" }, { label: "Booking Rate", value: "89%" }, { label: "Customer Rating", value: "4.9★" }].map((metric) => (
-                    <div key={metric.label} className="bg-white/5 rounded-2xl p-4 text-center">
-                      <div className="text-2xl font-bold text-gold-gradient mb-1">{metric.value}</div>
-                      <div className="text-white/50 text-xs">{metric.label}</div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 p-4 bg-glamora-gold/10 border border-glamora-gold/20 rounded-2xl">
-                  <p className="text-glamora-gold text-sm font-medium text-center">✨ Average salon sees 43% revenue increase in 3 months</p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* DOWNLOAD APP */}
-      <section className="py-20 px-4 bg-glamora-dark-2">
-        <div className="max-w-7xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <div className="inline-flex items-center gap-2 bg-glamora-pink/10 border border-glamora-pink/30 rounded-full px-4 py-1.5 mb-6">
-              <Download className="w-4 h-4 text-glamora-pink" />
-              <span className="text-glamora-pink text-sm font-medium">Download the Glamora App</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Beauty at Your <span className="text-gold-gradient">Fingertips</span></h2>
-            <p className="text-white/60 mb-10 max-w-xl mx-auto">Book, manage, and track your beauty appointments on the go with our award-winning mobile app.</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              {[
-                { platform: "App Store", sub: "Download on the", icon: "M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" },
-                { platform: "Google Play", sub: "Get it on", icon: "M3.18 23.76c.33.17.72.18 1.09-.03l12.43-7.17-2.79-2.79-10.73 9.99zM.5 1.31C.19 1.67 0 2.21 0 2.93v18.14c0 .72.19 1.26.5 1.62l.09.08 10.16-10.16v-.24L.59 1.23.5 1.31zm20.47 9.52l-2.6-1.5-3.12 3.12 3.12 3.12 2.62-1.52c.75-.43.75-1.14-.02-1.58v.08l-.01-.07v.07l.01-.07v-.06zM4.27.24L16.7 7.41l-2.79 2.79-9.64-9.96z" }
-              ].map((app) => (
-                <a key={app.platform} href="#" className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl px-6 py-4 transition-all duration-200 hover:border-glamora-gold/30">
-                  <svg className="w-8 h-8 text-white/70" viewBox="0 0 24 24" fill="currentColor"><path d={app.icon}/></svg>
-                  <div className="text-left">
-                    <div className="text-white/40 text-xs">{app.sub}</div>
-                    <div className="text-white font-semibold">{app.platform}</div>
-                  </div>
-                </a>
-              ))}
+              <Link href="/partner"
+                className={cn('inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-glamora-gold to-amber-400 text-black font-bold rounded-2xl hover:opacity-90 transition-all shadow-xl shadow-glamora-gold/30', isAr && 'font-tajawal flex-row-reverse')}>
+                {isAr ? 'سجّل صالونك مجاناً' : 'List Your Salon Free'}
+                <ArrowRight className={cn('w-5 h-5', isAr && 'rotate-180')} />
+              </Link>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* BLOG */}
-      <section className="py-20 px-4">
+      {/* ══════════ BLOG ══════════ */}
+      <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-12">
-            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
-              <h2 className="text-3xl sm:text-4xl font-bold mb-2">Beauty <span className="text-gold-gradient">Blog</span></h2>
-              <p className="text-white/50">Tips, trends, and inspiration</p>
-            </motion.div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {blogPosts.map((post, i) => (
-              <motion.div key={post.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }} className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden hover:border-glamora-gold/30 transition-all duration-300">
-                <div className="relative h-48 overflow-hidden">
-                  <Image src={post.image} alt={post.title.en} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 33vw" />
-                  <div className="absolute top-3 left-3"><Badge variant="gold">{post.category}</Badge></div>
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-3 text-white/40 text-xs mb-3">
-                    <span>{post.date}</span><span>·</span><span>{post.readTime} min read</span>
+          <SectionHeader title={s.blog[lang]} link="/blog" linkText={s.viewAll[lang]} isAr={isAr} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {blogPosts.slice(0, 3).map((post, i) => (
+              <motion.div key={post.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-white/20 hover:-translate-y-1 transition-all duration-300">
+                <div className="relative h-44 overflow-hidden">
+                  <Image src={post.image} alt={post.title.en} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="33vw" />
+                  <div className="absolute top-3 left-3">
+                    <span className="text-xs bg-glamora-gold/80 text-black font-semibold px-2.5 py-1 rounded-full">{post.category}</span>
                   </div>
-                  <h3 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-glamora-gold transition-colors">{post.title.en}</h3>
-                  <p className="text-white/50 text-sm line-clamp-2 mb-4">{post.excerpt.en}</p>
-                  <button className="text-glamora-gold text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all duration-200">Read More <ArrowRight className="w-4 h-4" /></button>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center gap-3 text-white/30 text-xs mb-2">
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{post.readTime} min</span>
+                    <span>{post.date}</span>
+                  </div>
+                  <h3 className={cn('text-white font-semibold mb-2 line-clamp-2 leading-snug', isAr && 'font-tajawal text-right')}>
+                    {isAr ? post.title.ar : post.title.en}
+                  </h3>
+                  <Link href={`/blog/${post.id}`} className={cn('text-glamora-gold text-xs hover:text-glamora-gold-light transition-colors flex items-center gap-1', isAr && 'font-tajawal flex-row-reverse')}>
+                    {isAr ? 'اقرئي المزيد' : 'Read More'}
+                    <ArrowRight className={cn('w-3 h-3', isAr && 'rotate-180')} />
+                  </Link>
                 </div>
               </motion.div>
             ))}
@@ -673,23 +659,52 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* NEWSLETTER */}
-      <section className="py-20 px-4 bg-glamora-dark-2">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-gradient-to-r from-glamora-gold/10 to-glamora-pink/10 border border-glamora-gold/20 rounded-3xl p-10 sm:p-14">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-glamora-gold to-glamora-pink flex items-center justify-center mx-auto mb-6">
-              <Sparkles className="w-7 h-7 text-white" />
+      {/* ══════════ NEWSLETTER ══════════ */}
+      <section className="py-16 px-4">
+        <div className="max-w-2xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="text-4xl mb-4">💌</div>
+            <h2 className={cn('text-2xl sm:text-3xl font-bold text-white mb-3', isAr && 'font-tajawal')}>
+              {isAr ? 'ابقي على اطلاع بأحدث العروض' : 'Stay Updated with the Latest Deals'}
+            </h2>
+            <p className={cn('text-white/50 mb-6', isAr && 'font-tajawal')}>
+              {isAr ? 'اشتركي في نشرتنا البريدية واحصلي على عروض حصرية مبكراً' : 'Subscribe to our newsletter and get exclusive early access to deals'}
+            </p>
+            <div className={cn('flex gap-3 max-w-md mx-auto', isAr && 'flex-row-reverse')}>
+              <input
+                type="email"
+                placeholder={isAr ? 'بريدك الإلكتروني' : 'Enter your email'}
+                className={cn('flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white text-sm focus:outline-none focus:border-glamora-gold/50 placeholder:text-white/30', isAr && 'text-right font-tajawal')}
+              />
+              <button className={cn('px-6 py-3 bg-gradient-to-r from-glamora-gold to-glamora-pink text-white font-semibold rounded-2xl hover:opacity-90 transition-opacity whitespace-nowrap', isAr && 'font-tajawal')}>
+                {isAr ? 'اشتركي' : 'Subscribe'}
+              </button>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">Stay in the <span className="text-gold-gradient">Beauty Loop</span></h2>
-            <p className="text-white/60 mb-8 max-w-md mx-auto">Get exclusive offers, beauty tips, and new salon announcements delivered to your inbox.</p>
-            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <input type="email" placeholder="Enter your email address" className="flex-1 bg-white/10 border border-white/20 rounded-full px-5 py-3.5 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-glamora-gold/50 text-sm" />
-              <Button size="lg" className="flex-shrink-0">Subscribe ✨</Button>
-            </div>
-            <p className="text-white/30 text-xs mt-4">No spam. Unsubscribe anytime.</p>
           </motion.div>
         </div>
       </section>
+
     </div>
-  );
+  )
+}
+
+// ─── Section Header ────────────────────────────────────────────────────────
+function SectionHeader({ title, subtitle, link, linkText, isAr }: {
+  title: string; subtitle?: string; link?: string; linkText?: string; isAr: boolean
+}) {
+  return (
+    <div className={cn('flex items-start justify-between mb-8 gap-4', isAr && 'flex-row-reverse')}>
+      <div className={cn(isAr && 'text-right')}>
+        <h2 className={cn('text-2xl sm:text-3xl font-bold text-white', isAr && 'font-tajawal')}>{title}</h2>
+        {subtitle && <p className={cn('text-white/50 text-sm mt-1', isAr && 'font-tajawal')}>{subtitle}</p>}
+      </div>
+      {link && linkText && (
+        <Link href={link}
+          className={cn('shrink-0 flex items-center gap-1 text-sm text-glamora-gold hover:text-glamora-gold-light transition-colors', isAr && 'font-tajawal flex-row-reverse')}>
+          {linkText}
+          <ArrowRight className={cn('w-4 h-4', isAr && 'rotate-180')} />
+        </Link>
+      )}
+    </div>
+  )
 }

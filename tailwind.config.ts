@@ -27,6 +27,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],
         serif: ['var(--font-playfair)', 'serif'],
+        tajawal: ['Tajawal', 'sans-serif'],
       },
       animation: {
         'float': 'float 6s ease-in-out infinite',
